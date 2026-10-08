@@ -1,0 +1,30 @@
+services:
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+    - "8000:8000"
+    volumes:
+    - storingsmelder-data:/data
+    environment:
+      DATABASE_URL: postgres://storingsmelder:tt@db:5432/storingsmelder
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: storingsmelder
+      POSTGRES_PASSWORD: tt
+      POSTGRES_DB: storingsmelder
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storingsmelder -d storingsmelder"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+    - postgres-data:/var/lib/postgresql
+
+volumes:
+  storingsmelder-data:
+  postgres-data:
